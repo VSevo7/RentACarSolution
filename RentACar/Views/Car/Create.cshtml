@@ -1,0 +1,31 @@
+﻿@model RentACar.Models.Car
+
+<h2>Dodaj novi automobil</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="Brand">Marka:</label>
+        <input type="text" asp-for="Brand" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Model">Model:</label>
+        <input type="text" asp-for="Model" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Transmission">Vrsta mjenjača:</label>
+        <select asp-for="Transmission" class="form-control">
+            <option>Automatski</option>
+            <option>Ručni</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="Fuel">Gorivo:</label>
+        <select asp-for="Fuel" class="form-control">
+            <option>Benzin</option>
+            <option>Dizel</option>
+            <option>Električni</option>
+            <option>Hibrid</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Dodaj automobil</button>
+</form>

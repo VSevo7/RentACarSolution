@@ -1,0 +1,144 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<RentACar.Models.Car>
+
+@{
+    ViewData["Title"] = "Početna stranica";
+}
+
+<!-- Dodana pozadina -->
+<style>
+    body {
+        background: url('/images/Audi.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+    }
+
+    .modal-content {
+        color: black;
+    }
+
+    .table thead th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .table tbody tr {
+        background-color: white;
+        color: black;
+    }
+</style>
+
+<h2 class="text-center mt-5">Dobrodošli u RentACar</h2>
+
+<div class="text-center mb-4">
+    <h4>Pregled dostupnih automobila</h4>
+</div>
+
+<!-- Dugme za otvaranje modala za rezervaciju -->
+<div class="text-center">
+    <button class="btn btn-primary btn-lg mt-3" id="openReservationModal">Rezervirajte auto</button>
+</div>
+
+<!-- Modalni prozor sa listom automobila -->
+<div id="reservationModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Odaberi automobil za rezervaciju</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Zatvori">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (!Model.Any())
+                {
+                    <p class="text-danger text-center">Trenutno nema dostupnih automobila za najam.</p>
+                }
+                else
+                {
+                    <table class="table table-bordered text-center mt-3">
+                        <thead>
+                            <tr>
+                                <th>Marka</th>
+                                <th>Model</th>
+                                <th>Vrsta mjenjača</th>
+                                <th>Gorivo</th>
+                                <th>Dostupna količina</th>
+                                <th>Cijena najma po danu (€)</th>
+                                <th>Akcija</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var car in Model)
+                            {
+                                int availableQuantity = car.Quantity - (car.Reservations?.Count(r => r.Status == ReservationStatus.Confirmed) ?? 0);
+
+                                <tr>
+                                    <td>@car.Brand</td>
+                                    <td>@car.Model</td>
+                                    <td>@car.Transmission</td>
+                                    <td>@car.Fuel</td>
+                                    <td>@availableQuantity</td>
+                                    <td>@car.RentalPricePerDay €</td>
+                                    <td>
+                                        @if (availableQuantity > 0)
+                                        {
+                                            <button class="btn btn-success btn-sm select-car"
+                                                    data-carid="@car.Id"
+                                                    data-carname="@car.Brand @car.Model">
+                                                Rezerviraj
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Nema dostupnih vozila</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- NOVO: Forma za unos datuma -->
+                <div id="dateSelection" class="d-none">
+                    <h5>Odaberi datum</h5>
+                    <form id="reservationForm" method="post" asp-controller="Reservation" asp-action="Create">
+                        <input type="hidden" name="CarId" id="selectedCarId" />
+                        <div class="form-group">
+                            <label for="startDate">Datum početka:</label>
+                            <input type="date" class="form-control" name="StartDate" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">Datum završetka:</label>
+                            <input type="date" class="form-control" name="EndDate" id="endDate" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Potvrdi rezervaciju</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript za modal i odabir automobila -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("openReservationModal").addEventListener("click", function () {
+            $("#reservationModal").modal("show");
+        });
+
+        document.querySelectorAll(".select-car").forEach(button => {
+            button.addEventListener("click", function () {
+                let carId = this.getAttribute("data-carid");
+                let carName = this.getAttribute("data-carname");
+
+                document.getElementById("selectedCarId").value = carId;
+                document.getElementById("dateSelection").classList.remove("d-none");
+            });
+        });
+    });
+</script>

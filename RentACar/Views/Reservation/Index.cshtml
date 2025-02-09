@@ -1,0 +1,204 @@
+﻿@model RentACar.Models.ReservationViewModel
+
+@{
+    ViewData["Title"] = "Rezervacije automobila";
+}
+
+<h2 class="text-center text-light">Rezervacije automobila</h2>
+
+<!-- Forma za rezervaciju automobila -->
+<div class="card p-4 mb-4 bg-light shadow-lg rounded">
+    <h4 class="text-dark">Rezerviraj automobil</h4>
+    <form asp-controller="Reservation" asp-action="Create" method="post">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="startDate" class="form-label">Datum početka:</label>
+                <input type="date" name="StartDate" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+                <label for="endDate" class="form-label">Datum završetka:</label>
+                <input type="date" name="EndDate" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+                <label for="carId" class="form-label">Odaberi automobil:</label>
+                <select name="CarId" class="form-control" required>
+                    @if (Model?.AvailableCars != null && Model.AvailableCars.Any())
+                    {
+                        @foreach (var car in Model.AvailableCars)
+                        {
+                            <option value="@car.Id">@car.Brand @car.Model (@car.AvailableQuantity dostupno)</option>
+                        }
+                    }
+                    else
+                    {
+                        <option disabled>Nema dostupnih automobila</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12 text-center">
+                <button type="submit" class="btn btn-primary">Rezerviraj</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Moje rezervacije (Korisnici vide samo svoje rezervacije) -->
+<h2 class="mt-5 text-light">Moje rezervacije</h2>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped text-center bg-white shadow-lg rounded">
+        <thead class="bg-dark text-white">
+            <tr>
+                <th>Automobil</th>
+                <th>Datum početka</th>
+                <th>Datum završetka</th>
+                <th>Status</th>
+                <th>Akcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.UserReservations != null && Model.UserReservations.Any())
+            {
+                @foreach (var reservation in Model.UserReservations)
+                {
+                    <tr id="reservation-row-@reservation.Id">
+                        <td>@(reservation.Car?.Brand ?? "Nepoznato") @(reservation.Car?.Model ?? "")</td>
+                        <td>@reservation.StartDate.ToString("dd.MM.yyyy.")</td>
+                        <td>@reservation.EndDate.ToString("dd.MM.yyyy.")</td>
+                        <td id="status-@reservation.Id">@reservation.Status</td>
+                        <td>
+                            @if (reservation.Status == ReservationStatus.Pending)
+                            {
+                                <form asp-controller="Reservation" asp-action="Cancel" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@reservation.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Otkaži</button>
+                                </form>
+                            }
+                            @if (reservation.Status == ReservationStatus.Confirmed)
+                            {
+                                <a asp-controller="Payment" asp-action="Index" asp-route-id="@reservation.Id" class="btn btn-warning btn-sm">Plati</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-danger">Nema aktivnih rezervacija.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Admin panel za upravljanje rezervacijama -->
+@if (User.IsInRole("Admin"))
+{
+    <h2 class="mt-5 text-light">Sve rezervacije</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center bg-white shadow-lg rounded">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>Korisnik</th>
+                    <th>Automobil</th>
+                    <th>Datum početka</th>
+                    <th>Datum završetka</th>
+                    <th>Status</th>
+                    <th>Akcije</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.AllReservations != null && Model.AllReservations.Any())
+                {
+                    @foreach (var reservation in Model.AllReservations)
+                    {
+                        <tr id="admin-reservation-row-@reservation.Id">
+                            <td>@(reservation.User?.FullName ?? "Nepoznato")</td>
+                            <td>@(reservation.Car?.Brand ?? "Nepoznato") @(reservation.Car?.Model ?? "")</td>
+                            <td>@reservation.StartDate.ToString("dd.MM.yyyy.")</td>
+                            <td>@reservation.EndDate.ToString("dd.MM.yyyy.")</td>
+                            <td id="admin-status-@reservation.Id">@reservation.Status</td>
+                            <td>
+                                @if (reservation.Status == ReservationStatus.Pending)
+                                {
+                                    <form asp-controller="Reservation" asp-action="Confirm" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@reservation.Id" />
+                                        <button type="submit" class="btn btn-success btn-sm">Prihvati</button>
+                                    </form>
+                                    <form asp-controller="Reservation" asp-action="Reject" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@reservation.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Odbij</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-danger">Nema rezervacija u sustavu.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- JavaScript za dinamičko ažuriranje rezervacija -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".cancel-reservation-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let formData = new FormData(this);
+                let reservationId = formData.get("id");
+
+                fetch(this.action, {
+                    method: "POST",
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById("status-" + reservationId).textContent = "Canceled";
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll(".confirm-reservation-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let formData = new FormData(this);
+                let reservationId = formData.get("id");
+
+                fetch(this.action, {
+                    method: "POST",
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById("admin-status-" + reservationId).textContent = "Confirmed";
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll(".reject-reservation-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let formData = new FormData(this);N
+                let reservationId = formData.get("id");
+
+                fetch(this.action, {
+                    method: "POST",
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById("admin-status-" + reservationId).textContent = "Rejected";
+                    }
+                });
+            });
+        });
+    });
+</script>

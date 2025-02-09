@@ -1,0 +1,93 @@
+/* Postavljanje osnovne veli?ine fonta */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Stilizacija fokusa na dugmadima i input poljima */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* Postavljanje stranice na punu visinu */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+/* Osiguravanje donje margine */
+body {
+    margin-bottom: 60px;
+}
+
+/* Stilizacija navigacijskog bara */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.navbar-nav .nav-link {
+    color: #333;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #0056b3;
+    }
+
+/* ?? HERO SECTION - POZADINSKA SLIKA */
+.hero-section {
+    background: url('/images/Audi.jpg') no-repeat center center;
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    text-align: center;
+    padding: 20px;
+}
+
+    /* Stilizacija gumba */
+    .hero-section .btn {
+        background-color: #007bff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        text-transform: uppercase;
+        margin-top: 20px;
+        transition: background 0.3s ease-in-out;
+    }
+
+        .hero-section .btn:hover {
+            background-color: #0056b3;
+        }
+
+/* Stilizacija podnožja */
+.footer {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}

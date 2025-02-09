@@ -1,0 +1,84 @@
+﻿@model IEnumerable<RentACar.Models.Car>
+
+@{
+    ViewData["Title"] = "Pretraži automobile";
+}
+
+<h2>Pretraži automobile</h2>
+
+<form asp-controller="Car" asp-action="Search" method="get">
+    <div class="form-group">
+        <label for="searchBrand">Marka:</label>
+        <input type="text" name="searchBrand" class="form-control" placeholder="Unesi marku automobila" />
+    </div>
+
+    <div class="form-group">
+        <label for="searchModel">Model:</label>
+        <input type="text" name="searchModel" class="form-control" placeholder="Unesi model automobila" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Pretraži</button>
+</form>
+
+<hr />
+
+@if (!Model.Any())
+{
+    <p class="text-danger">Nema dostupnih automobila.</p>
+}
+else
+{
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Vrsta mjenjača</th>
+                <th>Gorivo</th>
+                <th>Status</th>
+                <th>Akcija</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var car in Model)
+            {
+                <tr>
+                    <td>@car.Brand</td>
+                    <td>@car.Model</td>
+                    <td>@car.Transmission</td>
+                    <td>@car.Fuel</td>
+                    <td>
+                        @if (car.IsReserved)
+                        {
+                            <span class="badge bg-danger">Rezervirano</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Dostupno</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!car.IsReserved)
+                        {
+                            <form asp-controller="Car" asp-action="Reserve" method="post">
+                                <input type="hidden" name="id" value="@car.Id" />
+                                <label>Datum početka:</label>
+                                <input type="date" name="startDate" required class="form-control" />
+                                <label>Datum završetka:</label>
+                                <input type="date" name="endDate" required class="form-control" />
+                                <button type="submit" class="btn btn-primary mt-2">Rezerviraj auto</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-controller="Car" asp-action="CancelReservation" method="post">
+                                <input type="hidden" name="id" value="@car.Id" />
+                                <button type="submit" class="btn btn-warning">Otkaži rezervaciju</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Plaćanje rezervacije";
+}
+
+<h2 class="text-center text-light">Plaćanje rezervacije</h2>
+
+<div class="card p-4 bg-light shadow-lg rounded">
+    <h4 class="text-dark">Unesite podatke za plaćanje</h4>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info">@ViewBag.Message</div>
+    }
+
+    <form method="post" asp-controller="Payment" asp-action="ProcessPayment">
+        <div class="mb-3">
+            <label class="form-label">Broj kartice (16 brojeva):</label>
+            <input type="text" name="cardNumber" class="form-control" maxlength="16" pattern="\d{16}" required
+                   placeholder="1234 5678 9012 3456" title="Unesite 16 znamenki bez razmaka ili znakova." />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">CVC (3 broja):</label>
+            <input type="text" name="cvc" class="form-control" maxlength="3" pattern="\d{3}" required
+                   placeholder="123" title="Unesite točno 3 znamenke." />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Datum isteka:</label>
+            <div class="d-flex">
+                <input type="text" name="expiryMonth" class="form-control me-2" maxlength="2" pattern="(0[1-9]|1[0-2])" required
+                       placeholder="MM" title="Unesite mjesec (01-12)." style="width: 70px;" />
+                <span class="align-self-center">/</span>
+                <input type="text" name="expiryYear" class="form-control ms-2" maxlength="2" pattern="\d{2}" required
+                       placeholder="YY" title="Unesite posljednje dvije znamenke godine (npr. 25 za 2025)." style="width: 70px;" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ime i prezime:</label>
+            <input type="text" name="fullName" class="form-control" required
+                   placeholder="Ime Prezime" title="Unesite ime i prezime." />
+        </div>
+
+        <button type="submit" class="btn btn-success">Plati</button>
+    </form>
+</div>
